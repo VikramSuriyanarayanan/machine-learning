@@ -23,6 +23,7 @@ class LearningAgent(Agent):
         ## TO DO ##
         ###########
         # Set any additional class parameters as needed
+        self.testing = False
 
 
     def reset(self, destination=None, testing=False):
@@ -39,6 +40,13 @@ class LearningAgent(Agent):
         # Update epsilon using a decay function of your choice
         # Update additional class parameters as needed
         # If 'testing' is True, set epsilon and alpha to 0
+        self.testing = testing
+        
+        if self.testing:
+            self.epsilon = 0.0
+            self.alpha   = 0.0
+        else:
+            self.epsilon = self.epsilon - 0.05
 
         return None
 
@@ -62,7 +70,7 @@ class LearningAgent(Agent):
         # With the hand-engineered features, this learning process gets entirely negated.
         
         # Set 'state' as a tuple of relevant data for the agent        
-        state = None
+        state = (waypoint, inputs, deadline) #None
 
         return state
 
