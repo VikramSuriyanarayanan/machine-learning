@@ -24,7 +24,7 @@ class LearningAgent(Agent):
         ###########
         # Set any additional class parameters as needed
         self.testing = False
-
+        self.averageRewards = dict() # running average of rewards for each pair of (state, action)
 
     def reset(self, destination=None, testing=False):
         """ The reset function is called at the beginning of each trial.
@@ -70,7 +70,7 @@ class LearningAgent(Agent):
         # With the hand-engineered features, this learning process gets entirely negated.
         
         # Set 'state' as a tuple of relevant data for the agent        
-        state = (waypoint, inputs, deadline) #None
+        state = (waypoint, inputs) #None
 
         return state
 
@@ -83,7 +83,6 @@ class LearningAgent(Agent):
         ## TO DO ##
         ###########
         # Calculate the maximum Q-value of all actions for a given state
-        vdict = self.Q[state]
         maxQ = 0.0
         keys = self.Q.keys()
         for key in keys:
@@ -114,6 +113,32 @@ class LearningAgent(Agent):
 
         return
 
+    def getQ(self, state, action):
+        """ Yuefeng add this function for calculating running average of rewards. """
+        qvalue = 0.0
+        if state in self.Q:
+            vdict = self.Q[state]
+            if action in vdict:  
+                qvalue = vdict[action]
+            else:
+                print("getQ: action not in vdict!!!")
+        else:
+            print("getQ: state not in self.Q!!!")
+
+        return qvalue
+    
+    def setQ(self, state, action, qvalue):
+        """ Yuefeng add this function for calculating running average of rewards and then updating Q value. """
+        if state in self.Q:    
+            vdict = self.Q[state]
+            if action in vdict:         
+                vdict[action] = qvalue
+            else:
+                print("setQ: action not in vdict!!!") 
+        else:
+            print("setQ: state not in self.Q!!!")
+
+        return qvalue
 
     def choose_action(self, state):
         """ The choose_action function is called when the agent is asked to choose
@@ -170,7 +195,36 @@ class LearningAgent(Agent):
         # When learning, implement the value iteration update rule
         #   Use only the learning rate 'alpha' (do not use the discount factor 'gamma')
         if self.learning:
-           None
+           # update the total rewards and number of rewards received
+           if state in self.averageRewards:
+              adict = self.averageRewards[state]
+              if action in adict:
+                 totalRewards, numberOfRewards = adict[action]
+                 adict[action] = [totalRewards + reward, numberOfRewards + 1.0]
+              else:
+                 adict[action] = [reward, 1.0]
+           else:
+              dict_item = dict()
+              dict_item[action] = [reward, 1.0] # [running sum of rewards, number of rewards received]
+              self.averageRewards[state] = dict_item
+           
+           # calculate running average of rewards for the pair of (state, action)
+           adict = self.averageRewards[state]
+           totalRewards, numberOfRewards = adict[action]
+           averageRewards = totalRewards / numberOfRewards
+                
+           # get the current Q value for the pair of (state, action)
+           qvalue = self.getQ(state, action)
+                
+           # get alpha
+           alpha = self.alpha
+                
+           # calculate new Q value
+           new_qvalue = (1.0 - alpha) * qvalue + alpha * averageRewards
+                
+           # update Q value
+           self.setQ(state, action, qvalue)
+           
         else:
            None
 
