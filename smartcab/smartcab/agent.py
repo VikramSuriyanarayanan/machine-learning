@@ -83,8 +83,15 @@ class LearningAgent(Agent):
         ## TO DO ##
         ###########
         # Calculate the maximum Q-value of all actions for a given state
+        vdict = self.Q[state]
+        maxQ = 0.0
+        keys = self.Q.keys()
+        for key in keys:
+            value = self.Q[key]
+            if value > maxQ:
+                maxQ = value
 
-        maxQ = None
+        #maxQ = None
 
         return maxQ 
 
@@ -101,8 +108,8 @@ class LearningAgent(Agent):
             return
         else:
             dict_item = dict()
-            action = choose_action(state)
-            dict_item[action] = 0.0
+            for action in self.valid_actions:
+                dict_item[action] = 0.0
             self.Q[state] = dict_item
 
         return
@@ -127,6 +134,27 @@ class LearningAgent(Agent):
         action_index = random.randint(0, 3)
         if (not self.learning):
             action = self.valid_actions[action_index]
+        else:
+            random_number = random.uniform()
+            if (random_number <= self.epsilon:
+                action = self.valid_actions[action_index]
+            else:
+                maxQ = self.get_maxQ(state)
+                best_actions = []
+                dict_item = self.Q[state]
+                for action in self.valid_actions:
+                    qvalue = dict_item[action]
+                    if qvalue >= maxQ:
+                       best_actions.append(action)
+                number_of_actions = len(best_actions)
+                if number_of_actions < 1:
+                   print("choose_action error: best actions list is empty!")
+                   action = None
+                else if number_of_actions == 1:
+                   action = best_actions[0]
+                else:
+                   best_action_index = random.randint(0, number_of_actions)
+                   action = self.valid_actions[best_action_index]
         
         return action
 
@@ -141,6 +169,10 @@ class LearningAgent(Agent):
         ###########
         # When learning, implement the value iteration update rule
         #   Use only the learning rate 'alpha' (do not use the discount factor 'gamma')
+        if self.learning:
+           None
+        else:
+           None
 
         return
 
