@@ -103,21 +103,25 @@ class LearningAgent(Agent):
         # When learning, check if the 'state' is not in the Q-table
         # If it is not, create a new dictionary for that state
         #   Then, for each action available, set the initial Q-value to 0.0
-        if state in self.Q:
+        
+        # convert state to string
+        state_str = str(state)
+        if state_str in self.Q.keys():
             return
         else:
             dict_item = dict()
             for action in self.valid_actions:
                 dict_item[action] = 0.0
-            self.Q[state] = dict_item
+            self.Q[state_str] = dict_item
 
         return
 
     def getQ(self, state, action):
         """ Yuefeng add this function for calculating running average of rewards. """
         qvalue = 0.0
-        if state in self.Q:
-            vdict = self.Q[state]
+        state_str = str(state)
+        if state_str in self.Q.keys():
+            vdict = self.Q[state_str]
             if action in vdict:  
                 qvalue = vdict[action]
             else:
@@ -129,8 +133,9 @@ class LearningAgent(Agent):
     
     def setQ(self, state, action, qvalue):
         """ Yuefeng add this function for calculating running average of rewards and then updating Q value. """
-        if state in self.Q:    
-            vdict = self.Q[state]
+        state_str = str(state)
+        if state_str in self.Q.keys():    
+            vdict = self.Q[state_str]
             if action in vdict:         
                 vdict[action] = qvalue
             else:
@@ -156,17 +161,18 @@ class LearningAgent(Agent):
         # When learning, choose a random action with 'epsilon' probability
         # Otherwise, choose an action with the highest Q-value for the current state
         # Be sure that when choosing an action with highest Q-value that you randomly select between actions that "tie".
+        state_str = str(state)
         action_index = random.randint(0, 3)
         if (not self.learning):
             action = self.valid_actions[action_index]
         else:
-            random_number = random.uniform()
-            if (random_number <= self.epsilon:
+            random_number = random.uniform(0.0, 1.0)
+            if random_number <= self.epsilon:
                 action = self.valid_actions[action_index]
             else:
                 maxQ = self.get_maxQ(state)
                 best_actions = []
-                dict_item = self.Q[state]
+                dict_item = self.Q[state_str]
                 for action in self.valid_actions:
                     qvalue = dict_item[action]
                     if qvalue >= maxQ:
@@ -175,7 +181,7 @@ class LearningAgent(Agent):
                 if number_of_actions < 1:
                    print("choose_action error: best actions list is empty!")
                    action = None
-                else if number_of_actions == 1:
+                elif number_of_actions == 1:
                    action = best_actions[0]
                 else:
                    best_action_index = random.randint(0, number_of_actions)
@@ -194,10 +200,11 @@ class LearningAgent(Agent):
         ###########
         # When learning, implement the value iteration update rule
         #   Use only the learning rate 'alpha' (do not use the discount factor 'gamma')
+        state_str = str(state)
         if self.learning:
            # update the total rewards and number of rewards received
-           if state in self.averageRewards:
-              adict = self.averageRewards[state]
+           if state_str in self.averageRewards.keys():
+              adict = self.averageRewards[state_str]
               if action in adict:
                  totalRewards, numberOfRewards = adict[action]
                  adict[action] = [totalRewards + reward, numberOfRewards + 1.0]
@@ -206,10 +213,10 @@ class LearningAgent(Agent):
            else:
               dict_item = dict()
               dict_item[action] = [reward, 1.0] # [running sum of rewards, number of rewards received]
-              self.averageRewards[state] = dict_item
+              self.averageRewards[state_str] = dict_item
            
            # calculate running average of rewards for the pair of (state, action)
-           adict = self.averageRewards[state]
+           adict = self.averageRewards[state_str]
            totalRewards, numberOfRewards = adict[action]
            averageRewards = totalRewards / numberOfRewards
                 
