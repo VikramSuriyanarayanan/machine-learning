@@ -25,6 +25,7 @@ class LearningAgent(Agent):
         # Set any additional class parameters as needed
         self.testing = False
         self.averageRewards = dict() # running average of rewards for each pair of (state, action)
+        self.t = 0.0 # t - number of tries
 
     def reset(self, destination=None, testing=False):
         """ The reset function is called at the beginning of each trial.
@@ -41,12 +42,13 @@ class LearningAgent(Agent):
         # Update additional class parameters as needed
         # If 'testing' is True, set epsilon and alpha to 0
         self.testing = testing
+        self.t = self.t + 1.0
         
         if self.testing:
             self.epsilon = 0.0
             self.alpha   = 0.0
         else:
-            self.epsilon = self.epsilon - 0.05
+            self.epsilon = 1.0 / (self.t * self.t) # 1 / t*t, self.epsilon - 0.05
 
         return None
 
@@ -84,11 +86,13 @@ class LearningAgent(Agent):
         ###########
         # Calculate the maximum Q-value of all actions for a given state
         maxQ = 0.0
-        keys = self.Q.keys()
-        for key in keys:
-            value = self.Q[key]
-            if value > maxQ:
-                maxQ = value
+        state_str = str(state)
+        if  state_str in self.Q.keys():
+            adict = self.Q[state_str]
+            for key in adict.keys():
+                value = adict[key]
+                if value > maxQ:
+                    maxQ = value
 
         #maxQ = None
 
@@ -143,7 +147,7 @@ class LearningAgent(Agent):
         else:
             print("setQ: state not in self.Q!!!")
 
-        return qvalue
+        return
 
     def choose_action(self, state):
         """ The choose_action function is called when the agent is asked to choose
@@ -176,16 +180,16 @@ class LearningAgent(Agent):
                 for action in self.valid_actions:
                     qvalue = dict_item[action]
                     if qvalue >= maxQ:
-                       best_actions.append(action)
+                        best_actions.append(action)
                 number_of_actions = len(best_actions)
                 if number_of_actions < 1:
-                   print("choose_action error: best actions list is empty!")
-                   action = None
+                    print("choose_action error: best actions list is empty!")
+                    action = None
                 elif number_of_actions == 1:
-                   action = best_actions[0]
+                    action = best_actions[0]
                 else:
-                   best_action_index = random.randint(0, number_of_actions)
-                   action = self.valid_actions[best_action_index]
+                    best_action_index = random.randint(0, number_of_actions - 1)
+                    action = self.valid_actions[best_action_index]
         
         return action
 
@@ -202,38 +206,38 @@ class LearningAgent(Agent):
         #   Use only the learning rate 'alpha' (do not use the discount factor 'gamma')
         state_str = str(state)
         if self.learning:
-           # update the total rewards and number of rewards received
-           if state_str in self.averageRewards.keys():
-              adict = self.averageRewards[state_str]
-              if action in adict:
-                 totalRewards, numberOfRewards = adict[action]
-                 adict[action] = [totalRewards + reward, numberOfRewards + 1.0]
-              else:
-                 adict[action] = [reward, 1.0]
-           else:
-              dict_item = dict()
-              dict_item[action] = [reward, 1.0] # [running sum of rewards, number of rewards received]
-              self.averageRewards[state_str] = dict_item
+            # update the total rewards and number of rewards received
+            if state_str in self.averageRewards.keys():
+                adict = self.averageRewards[state_str]
+                if action in adict:
+                    totalRewards, numberOfRewards = adict[action]
+                    adict[action] = [totalRewards + reward, numberOfRewards + 1.0]
+                else:
+                    adict[action] = [reward, 1.0]
+            else:
+                dict_item = dict()
+                dict_item[action] = [reward, 1.0] # [running sum of rewards, number of rewards received]
+                self.averageRewards[state_str] = dict_item
            
-           # calculate running average of rewards for the pair of (state, action)
-           adict = self.averageRewards[state_str]
-           totalRewards, numberOfRewards = adict[action]
-           averageRewards = totalRewards / numberOfRewards
+            # calculate running average of rewards for the pair of (state, action)
+            adict = self.averageRewards[state_str]
+            totalRewards, numberOfRewards = adict[action]
+            averageRewards = totalRewards / numberOfRewards
                 
-           # get the current Q value for the pair of (state, action)
-           qvalue = self.getQ(state, action)
+            # get the current Q value for the pair of (state, action)
+            qvalue = self.getQ(state, action)
                 
-           # get alpha
-           alpha = self.alpha
+            # get alpha
+            alpha = self.alpha
                 
-           # calculate new Q value
-           new_qvalue = (1.0 - alpha) * qvalue + alpha * averageRewards
+            # calculate new Q value
+            new_qvalue = (1.0 - alpha) * qvalue + alpha * averageRewards
                 
-           # update Q value
-           self.setQ(state, action, qvalue)
+            # update Q value
+            self.setQ(state, action, qvalue)
            
         else:
-           None
+            None
 
         return
 
@@ -270,7 +274,7 @@ def run():
     #    * learning - set to True to force the driving agent to use Q-learning
     #    * epsilon  - continuous value for the exploration factor, default is 1
     #    * alpha    - continuous value for the learning rate, default is 0.5
-    agent = env.create_agent(LearningAgent, learning = True)
+    agent = env.create_agent(LearningAgent, learning = True, alpha = 0.5)
     
     ##############
     # Follow the driving agent
@@ -285,14 +289,14 @@ def run():
     #   display      - set to False to disable the GUI if PyGame is enabled
     #   log_metrics  - set to True to log trial and simulation results to /logs
     #   optimized    - set to True to change the default log file name
-    sim = Simulator(env, update_delay = 0.01, log_metrics = True)
+    sim = Simulator(env, update_delay = 0.01, log_metrics = True, optimized = True)
     
     ##############
     # Run the simulator
     # Flags:
     #   tolerance  - epsilon tolerance before beginning testing, default is 0.05 
     #   n_test     - discrete number of testing trials to perform, default is 0
-    sim.run(n_test = 10)
+    sim.run(n_test = 10, tolerance = 0.05)
 
 
 if __name__ == '__main__':
