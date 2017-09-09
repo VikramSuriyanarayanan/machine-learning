@@ -48,7 +48,11 @@ class LearningAgent(Agent):
             self.epsilon = 0.0
             self.alpha   = 0.0
         else:
-            self.epsilon = 1.0 / (self.t * self.t) # 1 / t*t, self.epsilon - 0.05
+            # First Q-learning implementation: epsilon = epsilon - 0.05
+            # self.epsilon = self.epsilon - 0.05
+            
+            # Improved Q-learning implementation: epsilon = 1 / (t*t)
+            self.epsilon = 1.0 / (self.t * self.t) # 1 / t*t
 
         return None
 
@@ -89,12 +93,17 @@ class LearningAgent(Agent):
         state_str = str(state)
         if  state_str in self.Q.keys():
             adict = self.Q[state_str]
+            print("Q-list: state_str  ", state_str)
             for key in adict.keys():
                 value = adict[key]
+                print("Q-list: action = ", key, " ,value = ", value) 
                 if value > maxQ:
                     maxQ = value
+        else:
+            print("state_str = ", state_str, " not in Q list!")
 
         #maxQ = None
+        print("max Q value = ", maxQ)
 
         return maxQ 
 
@@ -126,7 +135,7 @@ class LearningAgent(Agent):
         state_str = str(state)
         if state_str in self.Q.keys():
             vdict = self.Q[state_str]
-            if action in vdict:  
+            if action in vdict.keys():  
                 qvalue = vdict[action]
             else:
                 print("getQ: action not in vdict!!!")
@@ -140,7 +149,7 @@ class LearningAgent(Agent):
         state_str = str(state)
         if state_str in self.Q.keys():    
             vdict = self.Q[state_str]
-            if action in vdict:         
+            if action in vdict.keys():         
                 vdict[action] = qvalue
             else:
                 print("setQ: action not in vdict!!!") 
@@ -173,6 +182,7 @@ class LearningAgent(Agent):
             random_number = random.uniform(0.0, 1.0)
             if random_number <= self.epsilon:
                 action = self.valid_actions[action_index]
+                print("exploration, action = ", action)
             else:
                 maxQ = self.get_maxQ(state)
                 best_actions = []
@@ -187,9 +197,11 @@ class LearningAgent(Agent):
                     action = None
                 elif number_of_actions == 1:
                     action = best_actions[0]
+                    print("only one best action = ", action)
                 else:
                     best_action_index = random.randint(0, number_of_actions - 1)
-                    action = self.valid_actions[best_action_index]
+                    action = best_actions[best_action_index]
+                    print("multiple best actions, randomly selected action = ", action)
         
         return action
 
@@ -209,7 +221,7 @@ class LearningAgent(Agent):
             # update the total rewards and number of rewards received
             if state_str in self.averageRewards.keys():
                 adict = self.averageRewards[state_str]
-                if action in adict:
+                if action in adict.keys():
                     totalRewards, numberOfRewards = adict[action]
                     adict[action] = [totalRewards + reward, numberOfRewards + 1.0]
                 else:
@@ -226,15 +238,17 @@ class LearningAgent(Agent):
                 
             # get the current Q value for the pair of (state, action)
             qvalue = self.getQ(state, action)
+            print("current Q value = ", qvalue)
                 
             # get alpha
             alpha = self.alpha
                 
             # calculate new Q value
             new_qvalue = (1.0 - alpha) * qvalue + alpha * averageRewards
+            print("new Q value = ", new_qvalue)
                 
             # update Q value
-            self.setQ(state, action, qvalue)
+            self.setQ(state, action, new_qvalue)
            
         else:
             None
@@ -274,7 +288,12 @@ def run():
     #    * learning - set to True to force the driving agent to use Q-learning
     #    * epsilon  - continuous value for the exploration factor, default is 1
     #    * alpha    - continuous value for the learning rate, default is 0.5
-    agent = env.create_agent(LearningAgent, learning = True, alpha = 0.5)
+    
+    # First implementation of Q-learning
+    # agent = env.create_agent(LearningAgent, learning = True)
+    
+    # Improved implementation of Q-learning
+    agent = env.create_agent(LearningAgent, learning = True, alpha = 0.7)
     
     ##############
     # Follow the driving agent
@@ -289,6 +308,11 @@ def run():
     #   display      - set to False to disable the GUI if PyGame is enabled
     #   log_metrics  - set to True to log trial and simulation results to /logs
     #   optimized    - set to True to change the default log file name
+    
+    # First implementation of Q-learning
+    # sim = Simulator(env, update_delay = 0.01, log_metrics = True, optimized = False)
+    
+    # Improved implementation of Q-learning
     sim = Simulator(env, update_delay = 0.01, log_metrics = True, optimized = True)
     
     ##############
@@ -296,7 +320,12 @@ def run():
     # Flags:
     #   tolerance  - epsilon tolerance before beginning testing, default is 0.05 
     #   n_test     - discrete number of testing trials to perform, default is 0
-    sim.run(n_test = 10, tolerance = 0.05)
+    
+    # First implementation of Q-learning
+    # sim.run(n_test = 10)
+    
+    # Improved implementation of Q-learning
+    sim.run(n_test = 20, tolerance = 0.01)
 
 
 if __name__ == '__main__':
