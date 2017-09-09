@@ -293,7 +293,7 @@ def run():
     # agent = env.create_agent(LearningAgent, learning = True)
     
     # Improved implementation of Q-learning
-    agent = env.create_agent(LearningAgent, learning = True, alpha = 0.7)
+    agent = env.create_agent(LearningAgent, learning = True, alpha = 0.2)
     
     ##############
     # Follow the driving agent
@@ -325,7 +325,7 @@ def run():
     # sim.run(n_test = 10)
     
     # Improved implementation of Q-learning
-    sim.run(n_test = 20, tolerance = 0.01)
+    sim.run(n_test = 40, tolerance = 0.01)
 
 
 if __name__ == '__main__':
