@@ -24,7 +24,6 @@ class LearningAgent(Agent):
         ###########
         # Set any additional class parameters as needed
         self.testing = False
-        self.averageRewards = dict() # running average of rewards for each pair of (state, action)
         self.t = 0.0 # t - number of tries
 
     def reset(self, destination=None, testing=False):
@@ -217,26 +216,9 @@ class LearningAgent(Agent):
         # When learning, implement the value iteration update rule
         #   Use only the learning rate 'alpha' (do not use the discount factor 'gamma')
         state_str = str(state)
-        if self.learning:
-            # update the total rewards and number of rewards received
-            if state_str in self.averageRewards.keys():
-                adict = self.averageRewards[state_str]
-                if action in adict.keys():
-                    totalRewards, numberOfRewards = adict[action]
-                    adict[action] = [totalRewards + reward, numberOfRewards + 1.0]
-                else:
-                    adict[action] = [reward, 1.0]
-            else:
-                dict_item = dict()
-                dict_item[action] = [reward, 1.0] # [running sum of rewards, number of rewards received]
-                self.averageRewards[state_str] = dict_item
-           
-            # calculate running average of rewards for the pair of (state, action)
-            adict = self.averageRewards[state_str]
-            totalRewards, numberOfRewards = adict[action]
-            averageRewards = totalRewards / numberOfRewards
+        if self.learning:          
                 
-            # get the current Q value for the pair of (state, action)
+            # get the previous Q value for the pair of (state, action)
             qvalue = self.getQ(state, action)
             print("current Q value = ", qvalue)
                 
@@ -244,7 +226,7 @@ class LearningAgent(Agent):
             alpha = self.alpha
                 
             # calculate new Q value
-            new_qvalue = (1.0 - alpha) * qvalue + alpha * averageRewards
+            new_qvalue = (1.0 - alpha) * reward + alpha * qvalue
             print("new Q value = ", new_qvalue)
                 
             # update Q value
@@ -325,7 +307,7 @@ def run():
     # sim.run(n_test = 10)
     
     # Improved implementation of Q-learning
-    sim.run(n_test = 40, tolerance = 0.01)
+    sim.run(n_test = 40, tolerance = 0.001)
 
 
 if __name__ == '__main__':
