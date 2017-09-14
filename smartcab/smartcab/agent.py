@@ -307,7 +307,7 @@ def run():
     # sim.run(n_test = 10)
     
     # Improved implementation of Q-learning
-    sim.run(n_test = 40, tolerance = 0.001)
+    sim.run(n_test = 40, tolerance = 0.0001)
 
 
 if __name__ == '__main__':
