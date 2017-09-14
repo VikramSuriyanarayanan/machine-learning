@@ -3,6 +3,7 @@ import math
 from environment import Agent, Environment
 from planner import RoutePlanner
 from simulator import Simulator
+from math import exp
 
 class LearningAgent(Agent):
     """ An agent that learns to drive in the Smartcab world.
@@ -226,7 +227,7 @@ class LearningAgent(Agent):
             alpha = self.alpha
                 
             # calculate new Q value
-            new_qvalue = (1.0 - alpha) * reward + alpha * qvalue
+            new_qvalue = (1.0 - alpha) * qvalue + alpha * reward
             print("new Q value = ", new_qvalue)
                 
             # update Q value
@@ -275,7 +276,8 @@ def run():
     # agent = env.create_agent(LearningAgent, learning = True)
     
     # Improved implementation of Q-learning
-    agent = env.create_agent(LearningAgent, learning = True, alpha = 0.2)
+    # alpha 0.9, tolerance 0.000001 - Reliability A, safety A
+    agent = env.create_agent(LearningAgent, learning = True, alpha = 0.9)
     
     ##############
     # Follow the driving agent
@@ -307,7 +309,8 @@ def run():
     # sim.run(n_test = 10)
     
     # Improved implementation of Q-learning
-    sim.run(n_test = 40, tolerance = 0.0001)
+    # alpha 0.9, tolerance 0.000001 - Reliability A, safety A
+    sim.run(n_test = 40, tolerance = 0.000001)
 
 
 if __name__ == '__main__':
