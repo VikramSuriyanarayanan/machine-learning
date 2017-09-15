@@ -89,6 +89,11 @@ class LearningAgent(Agent):
         ## TO DO ##
         ###########
         # Calculate the maximum Q-value of all actions for a given state
+        
+        # recommended method per code review
+        maxQ = max(self.Q[str(state)].values())
+        
+        """
         maxQ = 0.0
         state_str = str(state)
         if  state_str in self.Q.keys():
@@ -101,6 +106,7 @@ class LearningAgent(Agent):
                     maxQ = value
         else:
             print("state_str = ", state_str, " not in Q list!")
+        """
 
         #maxQ = None
         print("max Q value = ", maxQ)
@@ -116,6 +122,10 @@ class LearningAgent(Agent):
         # When learning, check if the 'state' is not in the Q-table
         # If it is not, create a new dictionary for that state
         #   Then, for each action available, set the initial Q-value to 0.0
+        
+        # Code review comment: Make sure your Q-Table is ONLY initialized when Learning == True
+        if (not self.learning):
+            return
         
         # convert state to string
         state_str = str(state)
@@ -184,6 +194,11 @@ class LearningAgent(Agent):
                 action = self.valid_actions[action_index]
                 print("exploration, action = ", action)
             else:
+                # recommended method per code review
+                best_actions = [action for action in self.valid_actions if self.Q[str(state)][action] == max(self.Q[str(state)].values())]
+                action = random.choice(best_actions)
+                
+                """
                 maxQ = self.get_maxQ(state)
                 best_actions = []
                 dict_item = self.Q[state_str]
@@ -202,6 +217,7 @@ class LearningAgent(Agent):
                     best_action_index = random.randint(0, number_of_actions - 1)
                     action = best_actions[best_action_index]
                     print("multiple best actions, randomly selected action = ", action)
+                """
         
         return action
 
