@@ -13181,6 +13181,7 @@ zMzMzKxK/j9VHZ0EoZrKogAAAABJRU5ErkJggg==
 </ul>
 <p>The next waypoint determines the direction in which the Smartcab moves. Thus this feature directly impacts both safety and efficiency.</p>
 <p>The intersection inputs provide information about potential cars that may be on the left, right or oncoming of our smartcab. Thus this feature is relevant for learning both safety and efficiency as well.</p>
+<p>I have omitted the deadline for the following reason. The deadline is not a well defined state in that it keeps changing with the selected destination for each trial and/or testing. If I include this feature in the state, one of the potential flaws is that the undeterministic nature of deadline will decrease the Smartcab's learning capability.</p>
 
 </div>
 </div>
@@ -13239,8 +13240,8 @@ zMzMzKxK/j9VHZ0EoZrKogAAAABJRU5ErkJggg==
 <li>turn right</li>
 <li>none (idle)</li>
 </ul>
-<p>The number of possible values of sense is 2 x 3 x 4 = 24.</p>
-<p>Thus the size of state space = 3 x 24 = 72.</p>
+<p>The number of possible values of sense is 2 x (4 x 4 x 4) = 128.</p>
+<p>Thus the size of state space = 3 x 128 = 384.</p>
 
 </div>
 </div>
@@ -16800,7 +16801,7 @@ WGZmZmZmZg3iAMvMzMzMzKxBHGCZmZmZmZk1iAMsMzMzMzOzBnGAZWZmZmZm1iAOsMzMzMzMzBrk
 <div class="text_cell_render border-box-sizing rendered_html">
 <p><strong>Answer:</strong></p>
 <ul>
-<li><p>The characteristic with the Smartcab (simulator) itself is that it uses a deadline to determine the success of a trial. In order to get to the destination before the deadline, the Smartcab should try to take the shortest path possible. This conflicts with the use of future rewards, which encourages to get as much rewards as possible even though it might lead to longer path.</p>
+<li><p>The characteristic with the Smartcab (simulator) itself is that the agent does not have a full view of the entire grid. At the time of updating Q value, given a pair of state and action, the agent only knows the previous Q value of the pair and the new reward. The agent does not have the information for estimating future rewards.</p>
 </li>
 <li><p>The other characteristic with the environment is that the environment resets the rewards and related status at the beginning of each trial. Because of this, it is impossible for the Smartcab to accumulate rewards across different trials.</p>
 </li>
