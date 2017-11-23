@@ -1,1 +1,7 @@
-1. Wisconsin breast cancer data file: https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/wdbc.data 
+# Machine Learning Engineer Nanodegree
+
+## Capstone Project: Wisconsin Breast Cancer Diagnosis Deep Learning Revisited
+
+Yuefeng Zhang
+
+November 2017
